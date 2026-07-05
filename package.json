@@ -1,0 +1,25 @@
+{
+  "name": "gesture-love-stage",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run --pool=threads --maxWorkers=1",
+    "test:watch": "vitest --pool=threads --maxWorkers=1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.185.0",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.61.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1",
+    "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "@mediapipe/hands": "^0.4.1675469240",
+    "three": "^0.185.1"
+  }
+}
