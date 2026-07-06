@@ -16,9 +16,9 @@
 
 - 开始默认场景从普通球体改为地球模型粒子效果。
 - 地球粒子缓慢旋转，保持现有手左右挥动加速旋转能力。
-- 地球颜色以粉色为主，混入青色、紫色、白色、少量暖色点缀，形成更丰富的粒子层次。
-- 数字 `1`、`2`、`3` 改为多色粒子，而不是单一浅色。
-- `4` 场景的 `I 爱心 YOU` 更靠近，但避免爱心贴到 `YOU`。
+- 地球颜色以粉色为主，混入青色、蓝色、紫色、白色、淡黄、橙色、薄荷绿等丰富点缀，形成更有层次的粒子效果。
+- 数字 `1`、`2`、`3` 改为更丰富的多色粒子，而不是单一浅色。
+- `4` 场景的 `I 爱心 YOU` 更靠近，`I` 到爱心、爱心到 `Y` 的视觉间隔约为两个字符长度，同时避免爱心贴到 `YOU`。
 - 现有严格流程 `1 -> 2 -> 3 -> 4 -> 5/握拳` 不改。
 - 不恢复气球；`4` 继续使用烟花粒子效果。
 
@@ -51,10 +51,10 @@
 ## Visual Rules
 
 - 地球不是写实贴图，而是粒子造型：可看出球体轮廓、类似大陆/海洋的不规则区域、云层/星光点缀。
-- 粉色为主：目标视觉中粉色/玫红/浅粉粒子占比约 45%-60%。
-- 辅色：青色、蓝紫、白色、淡黄少量出现，避免单色疲劳。
-- 数字粒子多色但仍要读得清楚：浅粉、白、青、紫为主，少量亮黄点缀。
-- LOVE 布局要更亲密：`I` 到爱心、爱心到 `Y` 的视觉边缘间距应接近，但比当前线上版本更小。
+- 粉色为主：目标视觉中粉色/玫红/浅粉粒子占比约 38%-58%，其他颜色明显可见但不喧宾夺主。
+- 辅色更丰富：青色、蓝色、蓝紫、白色、淡黄、橙色、薄荷绿都可以出现，避免只像粉色单色球。
+- 数字粒子多色但仍要读得清楚：浅粉、白、青、蓝、紫、薄荷绿、淡黄、橙色混合，亮色比例高一些。
+- LOVE 布局要更亲密：`I` 到爱心、爱心到 `Y` 的视觉边缘间距应接近，并控制在约两个字符长度。
 
 ## Gesture Motion Rules
 
@@ -115,9 +115,9 @@ describe('createEarthTarget', () => {
   it('uses pink as the dominant color while keeping multiple accent colors', () => {
     const target = createEarthTarget({ count: 3000, seed: 7, radius: 2.7 })
 
-    expect(uniqueColorCount(target.colors)).toBeGreaterThanOrEqual(5)
-    expect(pinkishRatio(target.colors)).toBeGreaterThan(0.42)
-    expect(pinkishRatio(target.colors)).toBeLessThan(0.68)
+    expect(uniqueColorCount(target.colors)).toBeGreaterThanOrEqual(9)
+    expect(pinkishRatio(target.colors)).toBeGreaterThan(0.36)
+    expect(pinkishRatio(target.colors)).toBeLessThan(0.62)
   })
 })
 ```
@@ -141,9 +141,9 @@ import { writeColor } from '../core/color'
 import { mulberry32, pick } from '../core/random'
 import { computeBounds, type ParticleTarget } from '../core/targetTypes'
 
-const OCEAN_PINKS = ['#ff8bd9', '#ffc2f0', '#f7a8ff', '#ff6fcb']
-const LAND_ACCENTS = ['#7df7ff', '#9c7bff', '#fff1a8', '#ffffff']
-const CLOUDS = ['#ffffff', '#f7eaff', '#c8fbff']
+const OCEAN_PINKS = ['#ff8bd9', '#ffc2f0', '#f7a8ff', '#ff6fcb', '#ff4fb8', '#ffd6f5']
+const LAND_ACCENTS = ['#7df7ff', '#40c9ff', '#9c7bff', '#c084fc', '#fff1a8', '#ffb86b', '#82ffc9']
+const CLOUDS = ['#ffffff', '#f7eaff', '#c8fbff', '#fff7c2']
 
 export function createEarthTarget(options: {
   count: number
@@ -226,7 +226,7 @@ it('supports multiple colors for text particles', () => {
     width: 260,
     height: 320,
     seed: 13,
-    palette: ['#ff8bd9', '#ffffff', '#7df7ff'],
+    palette: ['#ff8bd9', '#ffffff', '#7df7ff', '#9c7bff', '#fff1a8', '#ffb86b'],
   })
   const colors = new Set<string>()
 
@@ -234,7 +234,7 @@ it('supports multiple colors for text particles', () => {
     colors.add(`${target.colors[i].toFixed(3)},${target.colors[i + 1].toFixed(3)},${target.colors[i + 2].toFixed(3)}`)
   }
 
-  expect(colors.size).toBeGreaterThanOrEqual(3)
+  expect(colors.size).toBeGreaterThanOrEqual(5)
 })
 ```
 
@@ -306,8 +306,34 @@ If `StageRenderer` is too DOM/WebGL-heavy for unit tests, add palette constants 
 Add to `src/rendering/stageTargetConfig.ts`:
 
 ```ts
-export const IDLE_EARTH_PALETTE = ['#ff8bd9', '#ffc2f0', '#f7a8ff', '#ff6fcb', '#7df7ff', '#9c7bff', '#ffffff', '#fff1a8']
-export const DIGIT_PALETTE = ['#ff8bd9', '#ffc2f0', '#ffffff', '#7df7ff', '#b891ff', '#fff1a8']
+export const IDLE_EARTH_PALETTE = [
+  '#ff8bd9',
+  '#ffc2f0',
+  '#f7a8ff',
+  '#ff6fcb',
+  '#ff4fb8',
+  '#ffd6f5',
+  '#7df7ff',
+  '#40c9ff',
+  '#9c7bff',
+  '#c084fc',
+  '#ffffff',
+  '#fff1a8',
+  '#ffb86b',
+  '#82ffc9',
+]
+export const DIGIT_PALETTE = [
+  '#ff8bd9',
+  '#ffc2f0',
+  '#ffffff',
+  '#7df7ff',
+  '#40c9ff',
+  '#b891ff',
+  '#c084fc',
+  '#fff1a8',
+  '#ffb86b',
+  '#82ffc9',
+]
 ```
 
 Add tests to `src/rendering/stageTargetConfig.test.ts`:
@@ -317,13 +343,15 @@ import { DIGIT_PALETTE, IDLE_EARTH_PALETTE } from './stageTargetConfig'
 
 it('keeps idle earth palette pink-led with multiple accents', () => {
   expect(IDLE_EARTH_PALETTE.slice(0, 4)).toEqual(['#ff8bd9', '#ffc2f0', '#f7a8ff', '#ff6fcb'])
-  expect(new Set(IDLE_EARTH_PALETTE).size).toBeGreaterThanOrEqual(8)
+  expect(new Set(IDLE_EARTH_PALETTE).size).toBeGreaterThanOrEqual(12)
 })
 
 it('uses a multicolor digit palette', () => {
-  expect(new Set(DIGIT_PALETTE).size).toBeGreaterThanOrEqual(6)
+  expect(new Set(DIGIT_PALETTE).size).toBeGreaterThanOrEqual(9)
   expect(DIGIT_PALETTE).toContain('#ff8bd9')
   expect(DIGIT_PALETTE).toContain('#7df7ff')
+  expect(DIGIT_PALETTE).toContain('#ffb86b')
+  expect(DIGIT_PALETTE).toContain('#82ffc9')
 })
 ```
 
@@ -415,7 +443,7 @@ git commit -m "feat: use earth idle and multicolor digits"
 Change `src/rendering/loveLayout.test.ts` so it asserts the heart is visually centered but closer:
 
 ```ts
-it('keeps the heart visually centered while making LOVE feel closer', () => {
+it('keeps two-character visual spacing around the heart', () => {
   const visualHalfWidth = {
     i: 0.45,
     heart: 0.95,
@@ -428,10 +456,10 @@ it('keeps the heart visually centered while making LOVE feel closer', () => {
   const leftGap = heartLeftEdge - iRightEdge
   const rightGap = yLeftEdge - heartRightEdge
 
-  expect(leftGap).toBeGreaterThan(1.1)
-  expect(leftGap).toBeLessThan(1.65)
-  expect(rightGap).toBeGreaterThan(1.1)
-  expect(rightGap).toBeLessThan(1.65)
+  expect(leftGap).toBeGreaterThan(1)
+  expect(leftGap).toBeLessThan(1.35)
+  expect(rightGap).toBeGreaterThan(1)
+  expect(rightGap).toBeLessThan(1.35)
   expect(Math.abs(leftGap - rightGap)).toBeLessThan(0.2)
 })
 ```
@@ -452,13 +480,13 @@ Set `src/rendering/loveLayout.ts` to:
 
 ```ts
 export const LOVE_LAYOUT = {
-  i: { x: -3.75, y: 0.02, scale: 0.56 },
+  i: { x: -3.15, y: 0.02, scale: 0.56 },
   heart: { x: -0.55, y: 0, scale: 0.5 },
-  you: { x: 3.65, y: 0.02, scale: 0.68 },
+  you: { x: 3.05, y: 0.02, scale: 0.68 },
 } as const
 ```
 
-This keeps the heart visually balanced while moving `I` and `YOU` closer than the current layout.
+This keeps the heart visually balanced while making the gaps read like roughly two character widths.
 
 - [ ] **Step 4: Run layout test**
 
@@ -688,8 +716,9 @@ node -e "const { chromium } = require('playwright'); const path = require('path'
 Acceptance:
 
 - `earth-idle.png` shows a spherical particle earth, not a flat cloud.
-- Earth is pink-led and contains at least cyan/purple/white accents.
-- LOVE scene has `I 爱心 YOU` closer than before, with heart not touching `Y`.
+- Earth is pink-led and contains visible cyan, blue, purple, white, yellow, orange, and mint accents.
+- Digit scenes use visibly varied colors while keeping the number readable.
+- LOVE scene has `I 爱心 YOU` spaced at roughly two character widths, with heart not touching `Y`.
 - Fireworks remain visible in LOVE scene.
 
 - [ ] **Step 4: Run full tests and build**
@@ -766,6 +795,6 @@ Expected: status code `200`.
 
 ## Self-Review
 
-- Spec coverage: 地球粒子、慢速旋转、多色粉色主导、数字多色、LOVE 更靠近、保留流程与烟花、部署验证均有对应任务。
+- Spec coverage: 地球粒子、慢速旋转、多色粉色主导、更丰富粒子颜色、数字多色、LOVE 两字符间距、保留流程与烟花、部署验证均有对应任务。
 - Placeholder scan: 本文没有未完成占位内容，每个开发步骤包含文件、代码或命令。
 - Type consistency: 新增 `createEarthTarget(options)` 返回 `ParticleTarget`，`createTextTarget` 继续兼容 `color` 并新增 `palette`，`StageRenderer` 调用与现有 target API 保持一致。
