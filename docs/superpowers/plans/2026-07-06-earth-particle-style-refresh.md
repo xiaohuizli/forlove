@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 把开场粒子球升级为粉色为主、多色点缀的地球模型粒子效果，并让 `I 爱心 YOU` 更靠近，同时让数字粒子也使用多色视觉。
+**Goal:** 把开场粒子球升级为参考图风格的宇宙发光地球：蓝色海洋、绿色大陆、白色云层、星空背景、环绕光轨，并让 `I 爱心 YOU` 更靠近，同时让数字粒子也使用多色视觉。
 
 **Architecture:** 继续沿用现有 Three.js + 粒子目标系统，不引入新的渲染框架。新增一个地球粒子 target 负责大陆/海洋/云层色块分布，数字和 LOVE 只调整已有 target 的颜色与布局参数。手势流程、摄像头启动、1->2->3->4->5 顺序控制保持不变。
 
@@ -16,7 +16,7 @@
 
 - 开始默认场景从普通球体改为地球模型粒子效果。
 - 地球粒子缓慢旋转，保持现有手左右挥动加速旋转能力。
-- 地球颜色以粉色为主，混入青色、蓝色、紫色、白色、淡黄、橙色、薄荷绿等丰富点缀，形成更有层次的粒子效果。
+- 地球颜色改为蓝色海洋、绿色/金色大陆、白色云层高光，并加入外层蓝色辉光、星空背景和环绕光轨。
 - 数字 `1`、`2`、`3` 改为更丰富的多色粒子，而不是单一浅色。
 - `4` 场景的 `I 爱心 YOU` 更靠近，`I` 到爱心、爱心到 `Y` 的视觉间隔约为两个字符长度，同时避免爱心贴到 `YOU`。
 - 现有严格流程 `1 -> 2 -> 3 -> 4 -> 5/握拳` 不改。
@@ -51,8 +51,8 @@
 ## Visual Rules
 
 - 地球不是写实贴图，而是粒子造型：可看出球体轮廓、类似大陆/海洋的不规则区域、云层/星光点缀。
-- 粉色为主：目标视觉中粉色/玫红/浅粉粒子占比约 38%-58%，其他颜色明显可见但不喧宾夺主。
-- 辅色更丰富：青色、蓝色、蓝紫、白色、淡黄、橙色、薄荷绿都可以出现，避免只像粉色单色球。
+- 地球主视觉：深蓝/亮蓝海洋、绿色/金色大陆、白色云层高光，外圈带蓝色大气辉光。
+- 宇宙氛围：开场 idle 场景显示星空背景和多条环绕地球的发光轨道线。
 - 数字粒子多色但仍要读得清楚：浅粉、白、青、蓝、紫、薄荷绿、淡黄、橙色混合，亮色比例高一些。
 - LOVE 布局要更亲密：`I` 到爱心、爱心到 `Y` 的视觉边缘间距应接近，并控制在约两个字符长度。
 
@@ -716,8 +716,8 @@ node -e "const { chromium } = require('playwright'); const path = require('path'
 Acceptance:
 
 - `earth-idle.png` shows a spherical particle earth, not a flat cloud.
-- Earth is pink-led and contains visible cyan, blue, purple, white, yellow, orange, and mint accents.
-- Earth must show differentiated density: continent regions are visibly denser while ocean regions stay sparser and pink-led.
+- Earth resembles the reference image: blue oceans, green/gold continents, white cloud highlights, blue atmospheric glow, star field, and orbit trails.
+- Earth must show differentiated density: continent regions are visibly denser while ocean regions stay sparser and blue-led.
 - Digit scenes use visibly varied colors while keeping the number readable.
 - LOVE scene has `I 爱心 YOU` spaced at roughly two character widths, with heart not touching `Y`.
 - Fireworks remain visible in LOVE scene.
@@ -796,6 +796,6 @@ Expected: status code `200`.
 
 ## Self-Review
 
-- Spec coverage: 地球粒子、慢速旋转、多色粉色主导、更丰富粒子颜色、数字多色、LOVE 两字符间距、保留流程与烟花、部署验证均有对应任务。
+- Spec coverage: 地球粒子、慢速旋转、蓝海绿陆白云、星空与环绕光轨、数字多色、LOVE 两字符间距、保留流程与烟花、部署验证均有对应任务。
 - Placeholder scan: 本文没有未完成占位内容，每个开发步骤包含文件、代码或命令。
 - Type consistency: 新增 `createEarthTarget(options)` 返回 `ParticleTarget`，`createTextTarget` 继续兼容 `color` 并新增 `palette`，`StageRenderer` 调用与现有 target API 保持一致。

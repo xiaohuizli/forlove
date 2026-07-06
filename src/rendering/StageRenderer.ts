@@ -4,6 +4,7 @@ import { createEarthTarget } from '../targets/earthTarget'
 import { createEyeTarget } from '../targets/eyeTarget'
 import { createFilledHeartTarget } from '../targets/filledHeartTarget'
 import { createTextTarget } from '../targets/textTarget'
+import { EarthAtmosphereLayer } from '../layers/EarthAtmosphereLayer'
 import { FireworkLayer } from '../layers/FireworkLayer'
 import { SparkleLayer } from '../layers/SparkleLayer'
 import { ParticleField } from './ParticleField'
@@ -19,6 +20,7 @@ export class StageRenderer {
   private readonly camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100)
   private readonly renderer: THREE.WebGLRenderer
   private readonly particleField: ParticleField
+  private readonly earthAtmosphereLayer = new EarthAtmosphereLayer()
   private readonly fireworkLayer = new FireworkLayer(FIREWORK_MAX_PARTICLES)
   private readonly sparkleLayer = new SparkleLayer(800)
   private readonly targets: Record<SceneId, ParticleTarget>
@@ -59,6 +61,7 @@ export class StageRenderer {
       eye: createEyeTarget({ count, seed: 9 }),
     }
     this.particleField = new ParticleField(this.targets.idle)
+    this.scene.add(this.earthAtmosphereLayer.group)
     this.scene.add(this.particleField.points)
     this.scene.add(this.fireworkLayer.points)
     this.scene.add(this.sparkleLayer.points)
@@ -115,6 +118,7 @@ export class StageRenderer {
     this.lastFrame = now
     const sparkleIntensity = this.currentScene === 'love' ? 1 : this.currentScene === 'eye' ? 0.45 : 0.16
     this.particleField.update(delta)
+    this.earthAtmosphereLayer.update(delta, this.currentScene === 'idle')
     this.fireworkLayer.update(delta, this.currentScene === 'love' ? 1 : 0)
     this.sparkleLayer.update(now, sparkleIntensity)
     const rotation = computeSceneRotation(now, this.currentScene, this.idleRotationBoost, this.idleRotationDirection)

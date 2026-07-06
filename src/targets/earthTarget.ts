@@ -2,9 +2,9 @@ import { writeColor } from '../core/color'
 import { mulberry32, pick } from '../core/random'
 import { computeBounds, type ParticleTarget } from '../core/targetTypes'
 
-const OCEAN_PINKS = ['#ff8bd9', '#ff75ce', '#f7a8ff', '#ff6fcb', '#ff4fb8', '#ffd6f5']
-const LAND_ACCENTS = ['#7df7ff', '#40c9ff', '#24e6d8', '#9c7bff', '#c084fc', '#82ffc9', '#3dffad']
-const CLOUDS = ['#ffffff', '#f7eaff', '#c8fbff', '#fff7c2']
+const OCEAN_BLUES = ['#001f78', '#0030a8', '#0040d8', '#0058f0', '#06328f', '#006a9c']
+const LAND_ACCENTS = ['#00c853', '#39d353', '#7fd33b', '#16a34a', '#b5a642', '#d6b64c']
+const CLOUDS = ['#ffffff', '#dbefff', '#fff4c8']
 const VISIBLE_CONTINENTS = [
   { x: -0.62, y: 0.33, rx: 0.36, ry: 0.3 },
   { x: -0.45, y: -0.32, rx: 0.24, ry: 0.42 },
@@ -40,7 +40,7 @@ export function createEarthTarget(options: {
     } else if (sample.isLand) {
       writeColor(colors, i, pick(sample.nearCoast && random() > 0.6 ? [...LAND_ACCENTS, '#fff1a8'] : LAND_ACCENTS, random))
     } else {
-      writeColor(colors, i, pick(OCEAN_PINKS, random))
+      writeColor(colors, i, pick(OCEAN_BLUES, random))
     }
   }
 
@@ -103,8 +103,8 @@ function createEarthPointCandidate(options: {
   const landValue = landScore + coastlineNoise
   const isLand = landValue > -0.12
   const nearCoast = Math.abs(landValue + 0.12) < 0.08
-  const cloudBand = Math.abs(Math.sin(latitude * 8 + theta * 1.7)) < 0.06 && options.random() > 0.86
-  const polarGlow = Math.abs(unitZ) > 0.82 && options.random() > 0.74
+    const cloudBand = Math.abs(Math.sin(latitude * 8 + theta * 1.7)) < 0.045 && options.random() > 0.9
+    const polarGlow = Math.abs(unitZ) > 0.84 && options.random() > 0.82
 
   return { x, y, z, isLand, nearCoast, cloudBand, polarGlow }
 }

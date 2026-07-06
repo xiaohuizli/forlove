@@ -12,9 +12,11 @@ describe('stage target config', () => {
     expect(FIREWORK_MAX_PARTICLES).toBeGreaterThanOrEqual(500)
   })
 
-  it('keeps idle earth palette pink-led with multiple accents', () => {
-    expect(IDLE_EARTH_PALETTE.slice(0, 4)).toEqual(['#ff8bd9', '#ffc2f0', '#f7a8ff', '#ff6fcb'])
+  it('keeps idle earth palette blue-led with green land accents', () => {
+    expect(IDLE_EARTH_PALETTE.slice(0, 4)).toEqual(['#001f78', '#0030a8', '#0040d8', '#0058f0'])
     expect(new Set(IDLE_EARTH_PALETTE).size).toBeGreaterThanOrEqual(12)
+    expect(IDLE_EARTH_PALETTE).toContain('#00c853')
+    expect(IDLE_EARTH_PALETTE).toContain('#ffffff')
   })
 
   it('uses a multicolor digit palette', () => {

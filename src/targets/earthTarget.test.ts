@@ -9,29 +9,41 @@ function uniqueColorCount(colors: Float32Array): number {
   return unique.size
 }
 
-function pinkishRatio(colors: Float32Array): number {
-  let pinkish = 0
+function oceanBlueRatio(colors: Float32Array): number {
+  let ocean = 0
   const total = colors.length / 3
   for (let i = 0; i < colors.length; i += 3) {
     const r = colors[i]
     const g = colors[i + 1]
     const b = colors[i + 2]
-    if (r > 0.78 && b > 0.55 && g < 0.82) pinkish += 1
+    if (b > 0.52 && g > 0.18 && r < 0.12) ocean += 1
   }
-  return pinkish / total
+  return ocean / total
+}
+
+function cloudWhiteRatio(colors: Float32Array): number {
+  let cloud = 0
+  const total = colors.length / 3
+  for (let i = 0; i < colors.length; i += 3) {
+    const r = colors[i]
+    const g = colors[i + 1]
+    const b = colors[i + 2]
+    if (r > 0.78 && g > 0.78 && b > 0.78) cloud += 1
+  }
+  return cloud / total
 }
 
 function isLandAccent(colors: Float32Array, index: number): boolean {
   const offset = index * 3
   const key = `${colors[offset].toFixed(3)},${colors[offset + 1].toFixed(3)},${colors[offset + 2].toFixed(3)}`
   return new Set([
-    '0.490,0.969,1.000',
-    '0.251,0.788,1.000',
-    '0.141,0.902,0.847',
-    '0.612,0.482,1.000',
-    '0.753,0.518,0.988',
-    '0.510,1.000,0.788',
-    '0.239,1.000,0.678',
+    '0.173,0.949,0.612',
+    '0.000,0.784,0.325',
+    '0.224,0.827,0.325',
+    '0.498,0.827,0.231',
+    '0.086,0.639,0.290',
+    '0.710,0.651,0.259',
+    '0.839,0.714,0.298',
   ]).has(key)
 }
 
@@ -70,12 +82,13 @@ describe('createEarthTarget', () => {
     expect(target.bounds.height).toBeLessThan(5.8)
   })
 
-  it('uses pink as the dominant color while keeping multiple accent colors', () => {
+  it('uses blue oceans with green continents and white cloud highlights', () => {
     const target = createEarthTarget({ count: 3000, seed: 7, radius: 2.7 })
 
     expect(uniqueColorCount(target.colors)).toBeGreaterThanOrEqual(9)
-    expect(pinkishRatio(target.colors)).toBeGreaterThan(0.3)
-    expect(pinkishRatio(target.colors)).toBeLessThan(0.62)
+    expect(oceanBlueRatio(target.colors)).toBeGreaterThan(0.3)
+    expect(cloudWhiteRatio(target.colors)).toBeGreaterThan(0.02)
+    expect(cloudWhiteRatio(target.colors)).toBeLessThan(0.12)
   })
 
   it('creates visible continent and ocean regions instead of evenly speckled color', () => {
