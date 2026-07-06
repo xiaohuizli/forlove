@@ -86,8 +86,8 @@ export class StageApp {
 
   private onGesture(gesture: GestureSignal): void {
     const now = performance.now()
-    const rotationBoost = this.handWaveTracker.update(gesture.handCenterX, now)
-    this.renderer.setIdleRotationBoost(rotationBoost)
+    const handWave = this.handWaveTracker.update(gesture.handCenterX, now)
+    this.renderer.setIdleRotationBoost(handWave.boost, handWave.direction)
     const idleMode = idleParticleModeForGesture(this.lastScene, gesture)
     if (idleMode) {
       this.renderer.setIdleParticleMode(idleMode)

@@ -26,4 +26,22 @@ describe('createTextTarget', () => {
 
     expect(Array.from(first.positions)).toEqual(Array.from(second.positions))
   })
+
+  it('supports multiple colors for text particles', () => {
+    const target = createTextTarget({
+      text: '2',
+      count: 500,
+      width: 260,
+      height: 320,
+      seed: 13,
+      palette: ['#ff8bd9', '#ffffff', '#7df7ff', '#9c7bff', '#fff1a8', '#ffb86b'],
+    })
+    const colors = new Set<string>()
+
+    for (let i = 0; i < target.colors.length; i += 3) {
+      colors.add(`${target.colors[i].toFixed(3)},${target.colors[i + 1].toFixed(3)},${target.colors[i + 2].toFixed(3)}`)
+    }
+
+    expect(colors.size).toBeGreaterThanOrEqual(5)
+  })
 })

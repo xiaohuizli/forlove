@@ -717,6 +717,7 @@ Acceptance:
 
 - `earth-idle.png` shows a spherical particle earth, not a flat cloud.
 - Earth is pink-led and contains visible cyan, blue, purple, white, yellow, orange, and mint accents.
+- Earth must show differentiated density: continent regions are visibly denser while ocean regions stay sparser and pink-led.
 - Digit scenes use visibly varied colors while keeping the number readable.
 - LOVE scene has `I 爱心 YOU` spaced at roughly two character widths, with heart not touching `Y`.
 - Fireworks remain visible in LOVE scene.

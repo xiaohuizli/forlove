@@ -1,15 +1,15 @@
 import * as THREE from 'three'
 import { createCloudTarget } from '../targets/cloudTarget'
+import { createEarthTarget } from '../targets/earthTarget'
 import { createEyeTarget } from '../targets/eyeTarget'
 import { createFilledHeartTarget } from '../targets/filledHeartTarget'
-import { createSphereTarget } from '../targets/sphereTarget'
 import { createTextTarget } from '../targets/textTarget'
 import { FireworkLayer } from '../layers/FireworkLayer'
 import { SparkleLayer } from '../layers/SparkleLayer'
 import { ParticleField } from './ParticleField'
-import { computeSceneRotation } from './stageMotion'
+import { computeSceneRotation, type RotationDirection } from './stageMotion'
 import { LOVE_LAYOUT } from './loveLayout'
-import { DIGIT_TARGET_SIZE, FIREWORK_MAX_PARTICLES } from './stageTargetConfig'
+import { DIGIT_PALETTE, DIGIT_TARGET_SIZE, FIREWORK_MAX_PARTICLES } from './stageTargetConfig'
 import type { SceneId } from '../app/SceneDirector'
 import type { IdleParticleMode } from '../app/idleParticleMode'
 import type { ParticleTarget } from '../core/targetTypes'
@@ -27,6 +27,7 @@ export class StageRenderer {
   private lastFrame = performance.now()
   private currentScene: SceneId = 'idle'
   private idleRotationBoost = 0
+  private idleRotationDirection: RotationDirection = 0
   private onFps: (fps: number) => void = () => {}
   private frameCount = 0
   private lastFpsAt = performance.now()
@@ -40,7 +41,7 @@ export class StageRenderer {
     this.camera.position.set(0, 0, 10)
     const count = 18000
     this.idleTargets = {
-      sphere: createSphereTarget({ count, seed: 2, radius: 2.7, shellJitter: 0.1 }),
+      sphere: createEarthTarget({ count, seed: 2, radius: 2.7, shellJitter: 0.1 }),
       spread: createCloudTarget({
         count,
         seed: 24,
@@ -50,9 +51,9 @@ export class StageRenderer {
     }
     this.targets = {
       idle: this.idleTargets.sphere,
-      'count-1': createTextTarget({ text: '1', count, ...DIGIT_TARGET_SIZE, seed: 1, color: '#f4d6ff' }),
-      'count-2': createTextTarget({ text: '2', count, ...DIGIT_TARGET_SIZE, seed: 2, color: '#f4d6ff' }),
-      'count-3': createTextTarget({ text: '3', count, ...DIGIT_TARGET_SIZE, seed: 3, color: '#f4d6ff' }),
+      'count-1': createTextTarget({ text: '1', count, ...DIGIT_TARGET_SIZE, seed: 1, palette: DIGIT_PALETTE }),
+      'count-2': createTextTarget({ text: '2', count, ...DIGIT_TARGET_SIZE, seed: 2, palette: DIGIT_PALETTE }),
+      'count-3': createTextTarget({ text: '3', count, ...DIGIT_TARGET_SIZE, seed: 3, palette: DIGIT_PALETTE }),
       love: createLoveTarget(count),
       dissolve: createCloudTarget({ count, seed: 88, radius: 4.1 }),
       eye: createEyeTarget({ count, seed: 9 }),
@@ -76,8 +77,9 @@ export class StageRenderer {
     this.particleField.setTarget(this.targets[scene], transition)
   }
 
-  setIdleRotationBoost(boost: number): void {
+  setIdleRotationBoost(boost: number, direction: RotationDirection = 0): void {
     this.idleRotationBoost = Math.max(0, Math.min(2.4, boost))
+    this.idleRotationDirection = direction
   }
 
   setIdleParticleMode(mode: IdleParticleMode): void {
@@ -115,7 +117,7 @@ export class StageRenderer {
     this.particleField.update(delta)
     this.fireworkLayer.update(delta, this.currentScene === 'love' ? 1 : 0)
     this.sparkleLayer.update(now, sparkleIntensity)
-    const rotation = computeSceneRotation(now, this.currentScene, this.idleRotationBoost)
+    const rotation = computeSceneRotation(now, this.currentScene, this.idleRotationBoost, this.idleRotationDirection)
     this.scene.rotation.set(rotation.x, rotation.y, rotation.z)
     this.renderer.render(this.scene, this.camera)
     this.emitFps(now)

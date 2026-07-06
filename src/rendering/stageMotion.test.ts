@@ -9,13 +9,18 @@ describe('computeIdleSphereRotation', () => {
 
     expect(b.y).toBeGreaterThan(a.y)
     expect(c.y).toBeGreaterThan(b.y)
-    expect(c.y - a.y).toBeGreaterThan(0.7)
+    expect(c.y - a.y).toBeLessThan(0.28)
   })
 
-  it('rotates faster when hand-wave boost is present', () => {
-    const normal = computeIdleSphereRotation(1000, 0)
-    const boosted = computeIdleSphereRotation(1000, 1.5)
+  it('rotates the idle earth slowly by default but follows hand wave direction', () => {
+    const start = computeIdleSphereRotation(0, 0)
+    const later = computeIdleSphereRotation(1000, 0)
+    const left = computeIdleSphereRotation(1000, 2, -1)
+    const right = computeIdleSphereRotation(1000, 2, 1)
 
-    expect(boosted.y).toBeGreaterThan(normal.y * 2)
+    expect(Math.abs(later.y - start.y)).toBeLessThan(0.18)
+    expect(left.y).toBeLessThan(start.y)
+    expect(right.y).toBeGreaterThan(start.y)
+    expect(Math.abs(right.y - start.y)).toBeGreaterThan(Math.abs(later.y - start.y))
   })
 })

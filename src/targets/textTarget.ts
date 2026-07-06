@@ -1,5 +1,5 @@
 import { writeColor } from '../core/color'
-import { mulberry32 } from '../core/random'
+import { mulberry32, pick } from '../core/random'
 import { computeBounds, type ParticleTarget } from '../core/targetTypes'
 
 export function createTextTarget(options: {
@@ -9,6 +9,7 @@ export function createTextTarget(options: {
   height: number
   seed: number
   color?: string
+  palette?: string[]
 }): ParticleTarget {
   if (isJsdom()) {
     return createFallbackTextTarget(options)
@@ -56,7 +57,7 @@ export function createTextTarget(options: {
     positions[offset] = (pixel[0] - canvas.width / 2) * scale
     positions[offset + 1] = (canvas.height / 2 - pixel[1]) * scale
     positions[offset + 2] = (random() - 0.5) * 0.28
-    writeColor(colors, i, options.color ?? '#f7eaff')
+    writeColor(colors, i, options.palette ? pick(options.palette, random) : options.color ?? '#f7eaff')
   }
 
   centerPositions(positions)
@@ -74,6 +75,7 @@ function createFallbackTextTarget(options: {
   height: number
   seed: number
   color?: string
+  palette?: string[]
 }): ParticleTarget {
   const random = mulberry32(options.seed)
   const positions = new Float32Array(options.count * 3)
@@ -86,7 +88,7 @@ function createFallbackTextTarget(options: {
     positions[offset] = rect.x + (random() - 0.5) * rect.w
     positions[offset + 1] = rect.y + (random() - 0.5) * rect.h
     positions[offset + 2] = (random() - 0.5) * 0.24
-    writeColor(colors, i, options.color ?? '#f7eaff')
+    writeColor(colors, i, options.palette ? pick(options.palette, random) : options.color ?? '#f7eaff')
   }
 
   centerPositions(positions)

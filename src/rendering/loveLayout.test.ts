@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { LOVE_LAYOUT } from './loveLayout'
 
 describe('LOVE_LAYOUT', () => {
-  it('keeps the heart visually centered between I and the Y edge', () => {
+  it('keeps two-character visual spacing around the heart', () => {
     const visualHalfWidth = {
       i: 0.45,
       heart: 0.95,
@@ -15,12 +15,10 @@ describe('LOVE_LAYOUT', () => {
     const leftGap = heartLeftEdge - iRightEdge
     const rightGap = yLeftEdge - heartRightEdge
 
-    expect(leftGap).toBeGreaterThan(0)
-    expect(rightGap).toBeGreaterThan(0)
-    expect(Math.abs(leftGap - rightGap)).toBeLessThan(0.001)
-  })
-
-  it('leaves enough visual room between the heart and YOU', () => {
-    expect(LOVE_LAYOUT.you.x - LOVE_LAYOUT.heart.x).toBeGreaterThan(4.5)
+    expect(leftGap).toBeGreaterThan(1)
+    expect(leftGap).toBeLessThan(1.35)
+    expect(rightGap).toBeGreaterThan(1)
+    expect(rightGap).toBeLessThan(1.35)
+    expect(Math.abs(leftGap - rightGap)).toBeLessThan(0.2)
   })
 })
