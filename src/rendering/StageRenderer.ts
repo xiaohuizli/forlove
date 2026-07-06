@@ -23,6 +23,7 @@ export class StageRenderer {
   private animationId = 0
   private lastFrame = performance.now()
   private currentScene: SceneId = 'idle'
+  private idleRotationBoost = 0
   private onFps: (fps: number) => void = () => {}
   private frameCount = 0
   private lastFpsAt = performance.now()
@@ -63,6 +64,10 @@ export class StageRenderer {
     this.particleField.setTarget(this.targets[scene], transition)
   }
 
+  setIdleRotationBoost(boost: number): void {
+    this.idleRotationBoost = Math.max(0, Math.min(2.4, boost))
+  }
+
   start(): void {
     this.stop()
     this.animate()
@@ -91,7 +96,7 @@ export class StageRenderer {
     this.particleField.update(delta)
     this.fireworkLayer.update(delta, this.currentScene === 'love' ? 1 : 0)
     this.sparkleLayer.update(now, sparkleIntensity)
-    const rotation = computeSceneRotation(now, this.currentScene)
+    const rotation = computeSceneRotation(now, this.currentScene, this.idleRotationBoost)
     this.scene.rotation.set(rotation.x, rotation.y, rotation.z)
     this.renderer.render(this.scene, this.camera)
     this.emitFps(now)
@@ -114,13 +119,13 @@ function createLoveTarget(count: number): ParticleTarget {
   const youCount = count - iCount - heartCount
   const iText = createTextTarget({ text: 'I', count: iCount, width: 260, height: 320, seed: 76, color: '#f7eaff' })
   const heart = createFilledHeartTarget({ count: heartCount, seed: 78 })
-  const youText = createTextTarget({ text: 'YOU', count: youCount, width: 760, height: 320, seed: 77, color: '#f7eaff' })
+  const youText = createTextTarget({ text: 'YOU', count: youCount, width: 460, height: 320, seed: 77, color: '#f7eaff' })
   const positions = new Float32Array(count * 3)
   const colors = new Float32Array(count * 3)
   let offset = 0
   offset = appendTarget({ source: iText, positions, colors, offset, scale: 0.56, x: -2.72, y: 0.02 })
   offset = appendTarget({ source: heart, positions, colors, offset, scale: 0.5, x: -0.82, y: 0.0 })
-  appendTarget({ source: youText, positions, colors, offset, scale: 0.62, x: 1.48, y: 0.02 })
+  appendTarget({ source: youText, positions, colors, offset, scale: 0.68, x: 2.42, y: 0.02 })
 
   return {
     positions,

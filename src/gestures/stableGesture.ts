@@ -3,6 +3,7 @@ export type GestureKind = 'count' | 'open-palm' | 'fist' | 'none'
 export interface GestureSignal {
   fingerCount: number
   gesture: GestureKind
+  handCenterX?: number
 }
 
 export interface StableGestureOptions {

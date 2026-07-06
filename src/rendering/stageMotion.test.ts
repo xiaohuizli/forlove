@@ -11,4 +11,11 @@ describe('computeIdleSphereRotation', () => {
     expect(c.y).toBeGreaterThan(b.y)
     expect(c.y - a.y).toBeGreaterThan(0.7)
   })
+
+  it('rotates faster when hand-wave boost is present', () => {
+    const normal = computeIdleSphereRotation(1000, 0)
+    const boosted = computeIdleSphereRotation(1000, 1.5)
+
+    expect(boosted.y).toBeGreaterThan(normal.y * 2)
+  })
 })

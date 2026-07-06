@@ -14,6 +14,13 @@ describe('countExtendedFingers', () => {
   })
 
   it('classifies four fingers as a count gesture for the main flow', () => {
-    expect(classifyHand(makeHandLandmarks(4))).toEqual({ fingerCount: 4, gesture: 'count' })
+    expect(classifyHand(makeHandLandmarks(4))).toMatchObject({ fingerCount: 4, gesture: 'count' })
+  })
+
+  it('includes the hand center x position for wave-speed control', () => {
+    const signal = classifyHand(makeHandLandmarks(1))
+
+    expect(signal.handCenterX).toBeGreaterThan(0.4)
+    expect(signal.handCenterX).toBeLessThan(0.7)
   })
 })

@@ -1,5 +1,6 @@
 import { HandTracker } from '../camera/HandTracker'
 import { createSceneDirector, type SceneId } from './SceneDirector'
+import { createHandWaveTracker } from '../gestures/handMotion'
 import { createStableGesture } from '../gestures/stableGesture'
 import type { GestureSignal } from '../gestures/stableGesture'
 import { StageRenderer } from '../rendering/StageRenderer'
@@ -10,6 +11,7 @@ export class StageApp {
   private readonly demoDirector = createSceneDirector({ mode: 'auto' })
   private readonly gestureDirector = createSceneDirector()
   private readonly stableGesture = createStableGesture({ stableMs: 350, cooldownMs: 700 })
+  private readonly handWaveTracker = createHandWaveTracker()
   private readonly debug: boolean
   private readonly startMode: StartMode
   private readonly hud: HTMLElement
@@ -82,10 +84,13 @@ export class StageApp {
   }
 
   private onGesture(gesture: GestureSignal): void {
-    const stable = this.stableGesture.update(gesture, performance.now())
+    const now = performance.now()
+    const rotationBoost = this.handWaveTracker.update(gesture.handCenterX, now)
+    this.renderer.setIdleRotationBoost(rotationBoost)
+    const stable = this.stableGesture.update(gesture, now)
     this.updateHud({ gesture: `${gesture.gesture}:${gesture.fingerCount}` })
     if (!stable) return
-    const state = this.gestureDirector.handleGesture(stable, performance.now())
+    const state = this.gestureDirector.handleGesture(stable, now)
     this.applyScene(state.scene)
   }
 
