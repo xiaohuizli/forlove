@@ -1,5 +1,6 @@
 import { HandTracker } from '../camera/HandTracker'
 import { createSceneDirector, type SceneId } from './SceneDirector'
+import { idleParticleModeForGesture } from './idleParticleMode'
 import { createHandWaveTracker } from '../gestures/handMotion'
 import { createStableGesture } from '../gestures/stableGesture'
 import type { GestureSignal } from '../gestures/stableGesture'
@@ -87,6 +88,10 @@ export class StageApp {
     const now = performance.now()
     const rotationBoost = this.handWaveTracker.update(gesture.handCenterX, now)
     this.renderer.setIdleRotationBoost(rotationBoost)
+    const idleMode = idleParticleModeForGesture(this.lastScene, gesture)
+    if (idleMode) {
+      this.renderer.setIdleParticleMode(idleMode)
+    }
     const stable = this.stableGesture.update(gesture, now)
     this.updateHud({ gesture: `${gesture.gesture}:${gesture.fingerCount}` })
     if (!stable) return

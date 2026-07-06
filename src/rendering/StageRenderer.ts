@@ -8,8 +8,10 @@ import { FireworkLayer } from '../layers/FireworkLayer'
 import { SparkleLayer } from '../layers/SparkleLayer'
 import { ParticleField } from './ParticleField'
 import { computeSceneRotation } from './stageMotion'
+import { LOVE_LAYOUT } from './loveLayout'
 import { DIGIT_TARGET_SIZE, FIREWORK_MAX_PARTICLES } from './stageTargetConfig'
 import type { SceneId } from '../app/SceneDirector'
+import type { IdleParticleMode } from '../app/idleParticleMode'
 import type { ParticleTarget } from '../core/targetTypes'
 
 export class StageRenderer {
@@ -20,6 +22,7 @@ export class StageRenderer {
   private readonly fireworkLayer = new FireworkLayer(FIREWORK_MAX_PARTICLES)
   private readonly sparkleLayer = new SparkleLayer(800)
   private readonly targets: Record<SceneId, ParticleTarget>
+  private readonly idleTargets: Record<IdleParticleMode, ParticleTarget>
   private animationId = 0
   private lastFrame = performance.now()
   private currentScene: SceneId = 'idle'
@@ -36,8 +39,17 @@ export class StageRenderer {
     this.renderer.setClearColor(0x070811, 1)
     this.camera.position.set(0, 0, 10)
     const count = 18000
+    this.idleTargets = {
+      sphere: createSphereTarget({ count, seed: 2, radius: 2.7, shellJitter: 0.1 }),
+      spread: createCloudTarget({
+        count,
+        seed: 24,
+        radius: 5.2,
+        palette: ['#f7eaff', '#e3b2ff', '#a6f7ff', '#ff8bd9', '#fff4b8'],
+      }),
+    }
     this.targets = {
-      idle: createSphereTarget({ count, seed: 2, radius: 2.7, shellJitter: 0.1 }),
+      idle: this.idleTargets.sphere,
       'count-1': createTextTarget({ text: '1', count, ...DIGIT_TARGET_SIZE, seed: 1, color: '#f4d6ff' }),
       'count-2': createTextTarget({ text: '2', count, ...DIGIT_TARGET_SIZE, seed: 2, color: '#f4d6ff' }),
       'count-3': createTextTarget({ text: '3', count, ...DIGIT_TARGET_SIZE, seed: 3, color: '#f4d6ff' }),
@@ -66,6 +78,13 @@ export class StageRenderer {
 
   setIdleRotationBoost(boost: number): void {
     this.idleRotationBoost = Math.max(0, Math.min(2.4, boost))
+  }
+
+  setIdleParticleMode(mode: IdleParticleMode): void {
+    this.targets.idle = this.idleTargets[mode]
+    if (this.currentScene === 'idle') {
+      this.particleField.setTarget(this.targets.idle, mode === 'spread' ? 'dissolve' : 'morph')
+    }
   }
 
   start(): void {
@@ -123,9 +142,9 @@ function createLoveTarget(count: number): ParticleTarget {
   const positions = new Float32Array(count * 3)
   const colors = new Float32Array(count * 3)
   let offset = 0
-  offset = appendTarget({ source: iText, positions, colors, offset, scale: 0.56, x: -2.72, y: 0.02 })
-  offset = appendTarget({ source: heart, positions, colors, offset, scale: 0.5, x: -0.82, y: 0.0 })
-  appendTarget({ source: youText, positions, colors, offset, scale: 0.68, x: 2.42, y: 0.02 })
+  offset = appendTarget({ source: iText, positions, colors, offset, ...LOVE_LAYOUT.i })
+  offset = appendTarget({ source: heart, positions, colors, offset, ...LOVE_LAYOUT.heart })
+  appendTarget({ source: youText, positions, colors, offset, ...LOVE_LAYOUT.you })
 
   return {
     positions,
