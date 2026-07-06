@@ -56,6 +56,14 @@
 - 数字粒子多色但仍要读得清楚：浅粉、白、青、紫为主，少量亮黄点缀。
 - LOVE 布局要更亲密：`I` 到爱心、爱心到 `Y` 的视觉边缘间距应接近，但比当前线上版本更小。
 
+## Gesture Motion Rules
+
+- 手向左移动时，开场地球粒子向左旋转。
+- 手向右移动时，开场地球粒子向右旋转。
+- 手移动速度控制旋转速度，方向由 `handCenterX` 的增减决定。
+- 没有检测到手时，地球回到缓慢默认旋转。
+- 方向控制只应用于开场 idle 地球场景；数字、LOVE、烟花场景保持现有环境运动。
+
 ---
 
 ### Task 1: Add Earth Particle Target
@@ -471,28 +479,105 @@ git commit -m "fix: tighten balanced love layout"
 
 ---
 
-### Task 5: Slow Idle Earth Rotation Without Breaking Gesture Boost
+### Task 5: Directional Idle Earth Rotation Without Breaking Gesture Boost
 
 **Files:**
+- Modify: `src/gestures/handMotion.ts`
+- Modify: `src/gestures/handMotion.test.ts`
+- Modify: `src/app/StageApp.ts`
+- Modify: `src/rendering/StageRenderer.ts`
 - Modify: `src/rendering/stageMotion.ts`
 - Modify: `src/rendering/stageMotion.test.ts`
 
-- [ ] **Step 1: Add failing motion test**
+- [ ] **Step 1: Add failing hand direction test**
+
+Add to `src/gestures/handMotion.test.ts`:
+
+```ts
+it('reports wave direction from hand center movement', () => {
+  const tracker = createHandWaveTracker()
+
+  expect(tracker.update(0.6, 0)).toMatchObject({ direction: 0 })
+  expect(tracker.update(0.35, 100)).toMatchObject({ direction: -1 })
+  expect(tracker.update(0.72, 220)).toMatchObject({ direction: 1 })
+})
+```
+
+- [ ] **Step 2: Run hand motion test to verify it fails**
+
+Run:
+
+```bash
+npm test -- src/gestures/handMotion.test.ts
+```
+
+Expected: FAIL because `createHandWaveTracker().update()` currently returns only a number.
+
+- [ ] **Step 3: Update hand wave tracker return shape**
+
+In `src/gestures/handMotion.ts`, add:
+
+```ts
+export interface HandWaveMotion {
+  boost: number
+  direction: -1 | 0 | 1
+}
+```
+
+Change `update(handCenterX, now)` to return `HandWaveMotion`. Direction is based on screen-space hand movement:
+
+```ts
+const delta = handCenterX - lastX
+const direction: -1 | 0 | 1 = Math.abs(delta) < 0.015 ? 0 : delta < 0 ? -1 : 1
+```
+
+When no hand is detected or this is the first sample, return:
+
+```ts
+return { boost, direction: 0 }
+```
+
+When movement is detected, return:
+
+```ts
+return { boost, direction }
+```
+
+- [ ] **Step 4: Update StageApp to pass boost and direction**
+
+In `src/app/StageApp.ts`, replace:
+
+```ts
+const rotationBoost = this.handWaveTracker.update(gesture.handCenterX, now)
+this.renderer.setIdleRotationBoost(rotationBoost)
+```
+
+with:
+
+```ts
+const handWave = this.handWaveTracker.update(gesture.handCenterX, now)
+this.renderer.setIdleRotationBoost(handWave.boost, handWave.direction)
+```
+
+- [ ] **Step 5: Add failing directional motion test**
 
 Add to `src/rendering/stageMotion.test.ts`:
 
 ```ts
-it('rotates the idle earth slowly by default but speeds up with hand wave boost', () => {
+it('rotates the idle earth slowly by default but follows hand wave direction', () => {
   const start = computeSceneRotation(0, 'idle', 0)
   const later = computeSceneRotation(1000, 'idle', 0)
-  const boosted = computeSceneRotation(1000, 'idle', 2)
+  const left = computeSceneRotation(1000, 'idle', 2, -1)
+  const right = computeSceneRotation(1000, 'idle', 2, 1)
 
   expect(Math.abs(later.y - start.y)).toBeLessThan(0.18)
-  expect(Math.abs(boosted.y - start.y)).toBeGreaterThan(Math.abs(later.y - start.y))
+  expect(left.y).toBeLessThan(start.y)
+  expect(right.y).toBeGreaterThan(start.y)
+  expect(Math.abs(right.y - start.y)).toBeGreaterThan(Math.abs(later.y - start.y))
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails if current idle speed is too fast**
+- [ ] **Step 6: Run motion test to verify it fails**
 
 Run:
 
@@ -500,34 +585,72 @@ Run:
 npm test -- src/rendering/stageMotion.test.ts
 ```
 
-Expected: FAIL if current idle speed exceeds the slow-earth threshold.
+Expected: FAIL because `computeSceneRotation` does not yet accept direction.
 
-- [ ] **Step 3: Tune idle base speed**
+- [ ] **Step 7: Add direction to renderer and stage motion**
 
-In `src/rendering/stageMotion.ts`, set idle base rotation to a slower value while keeping boost additive. Target behavior:
+In `src/rendering/StageRenderer.ts`, add direction state:
 
 ```ts
-const baseSpeed = 0.11
-const boostedSpeed = baseSpeed + handWaveBoost * 0.18
+private idleRotationBoost = 0
+private idleRotationDirection: -1 | 0 | 1 = 0
 ```
 
-Use the existing function shape and only replace the idle speed constants.
+Change the setter:
 
-- [ ] **Step 4: Run motion test**
+```ts
+setIdleRotationBoost(boost: number, direction: -1 | 0 | 1 = 0): void {
+  this.idleRotationBoost = Math.max(0, Math.min(2.4, boost))
+  this.idleRotationDirection = direction
+}
+```
+
+Change the animation call:
+
+```ts
+const rotation = computeSceneRotation(now, this.currentScene, this.idleRotationBoost, this.idleRotationDirection)
+```
+
+In `src/rendering/stageMotion.ts`, update signatures:
+
+```ts
+export function computeIdleSphereRotation(
+  nowMs: number,
+  handWaveBoost = 0,
+  handWaveDirection: -1 | 0 | 1 = 0,
+): StageRotation
+
+export function computeSceneRotation(
+  nowMs: number,
+  scene: string,
+  handWaveBoost = 0,
+  handWaveDirection: -1 | 0 | 1 = 0,
+): StageRotation
+```
+
+Use slow default drift when direction is `0`, and directional movement when direction is non-zero:
+
+```ts
+const baseSpeed = 0.00011
+const directedSpeed = 0.00018 + handWaveBoost * 0.00018
+const y = handWaveDirection === 0 ? nowMs * baseSpeed : nowMs * directedSpeed * handWaveDirection
+```
+
+- [ ] **Step 8: Run related tests**
 
 Run:
 
 ```bash
-npm test -- src/rendering/stageMotion.test.ts
+npm test -- src/gestures/handMotion.test.ts src/rendering/stageMotion.test.ts
 ```
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add src/rendering/stageMotion.ts src/rendering/stageMotion.test.ts
-git commit -m "fix: slow idle earth rotation"
+git add src/gestures/handMotion.ts src/gestures/handMotion.test.ts src/app/StageApp.ts src/rendering/StageRenderer.ts src/rendering/stageMotion.ts src/rendering/stageMotion.test.ts
+git commit -m "feat: add directional earth rotation"
 ```
 
 ---
