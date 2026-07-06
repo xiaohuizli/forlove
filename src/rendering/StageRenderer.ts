@@ -4,11 +4,11 @@ import { createEyeTarget } from '../targets/eyeTarget'
 import { createFilledHeartTarget } from '../targets/filledHeartTarget'
 import { createSphereTarget } from '../targets/sphereTarget'
 import { createTextTarget } from '../targets/textTarget'
-import { BalloonLayer } from '../layers/BalloonLayer'
+import { FireworkLayer } from '../layers/FireworkLayer'
 import { SparkleLayer } from '../layers/SparkleLayer'
 import { ParticleField } from './ParticleField'
 import { computeSceneRotation } from './stageMotion'
-import { DIGIT_TARGET_SIZE, LOVE_BALLOON_COUNT } from './stageTargetConfig'
+import { DIGIT_TARGET_SIZE, FIREWORK_MAX_PARTICLES } from './stageTargetConfig'
 import type { SceneId } from '../app/SceneDirector'
 import type { ParticleTarget } from '../core/targetTypes'
 
@@ -17,7 +17,7 @@ export class StageRenderer {
   private readonly camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100)
   private readonly renderer: THREE.WebGLRenderer
   private readonly particleField: ParticleField
-  private readonly balloonLayer = new BalloonLayer(LOVE_BALLOON_COUNT)
+  private readonly fireworkLayer = new FireworkLayer(FIREWORK_MAX_PARTICLES)
   private readonly sparkleLayer = new SparkleLayer(800)
   private readonly targets: Record<SceneId, ParticleTarget>
   private animationId = 0
@@ -46,7 +46,7 @@ export class StageRenderer {
     }
     this.particleField = new ParticleField(this.targets.idle)
     this.scene.add(this.particleField.points)
-    this.scene.add(this.balloonLayer.group)
+    this.scene.add(this.fireworkLayer.points)
     this.scene.add(this.sparkleLayer.points)
     this.container.appendChild(this.renderer.domElement)
     this.resize()
@@ -87,10 +87,9 @@ export class StageRenderer {
     const now = performance.now()
     const delta = Math.min((now - this.lastFrame) / 1000, 0.05)
     this.lastFrame = now
-    const loveIntensity = this.currentScene === 'love' ? 1 : this.currentScene === 'dissolve' ? 0.35 : 0
     const sparkleIntensity = this.currentScene === 'love' ? 1 : this.currentScene === 'eye' ? 0.45 : 0.16
     this.particleField.update(delta)
-    this.balloonLayer.update(delta, loveIntensity)
+    this.fireworkLayer.update(delta, this.currentScene === 'love' ? 1 : 0)
     this.sparkleLayer.update(now, sparkleIntensity)
     const rotation = computeSceneRotation(now, this.currentScene)
     this.scene.rotation.set(rotation.x, rotation.y, rotation.z)

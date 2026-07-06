@@ -7,7 +7,7 @@ Full-screen browser particle stage based on `../outputs/新视频效果项目开
 - Full-screen dark WebGL stage without the old side control panel.
 - Gesture-first flow: the page requests camera access on entry, then 1/2/3/4/5 fingers drive the display.
 - Idle state uses a rotating particle sphere matching the opening feel of the reference video.
-- 1/2/3 fingers show large numeric particle targets; 4 fingers enters the `I + heart + YOU` balloon scene.
+- 1/2/3 fingers show large numeric particle targets; 4 fingers enters the `I + heart + YOU` fireworks scene.
 - 5 fingers or fist returns to the opening rotating particle sphere.
 - Camera mode using MediaPipe Hands.
 - Stable gesture pipeline for finger-count, open-palm, and fist signals.
@@ -84,7 +84,7 @@ The current test suite covers:
 - eye/ring particle target;
 - gesture scene director behavior, including 4 fingers entering love and 5/fist returning to idle;
 - filled heart particle target for the love scene;
-- curved balloon string geometry;
+- fireworks particle bursts with outward expansion, gravity, twinkle, and fade-out;
 - explicit-only demo timeline behavior;
 - default startup mode requesting camera while staying gesture-only;
 - balloon layer motion and color variety.

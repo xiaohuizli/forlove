@@ -3,4 +3,4 @@ export const DIGIT_TARGET_SIZE = {
   height: 440,
 } as const
 
-export const LOVE_BALLOON_COUNT = 30
+export const FIREWORK_MAX_PARTICLES = 760
