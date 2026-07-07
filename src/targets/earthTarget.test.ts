@@ -33,6 +33,18 @@ function cloudWhiteRatio(colors: Float32Array): number {
   return cloud / total
 }
 
+function cityLightRatio(colors: Float32Array): number {
+  let city = 0
+  const total = colors.length / 3
+  for (let i = 0; i < colors.length; i += 3) {
+    const r = colors[i]
+    const g = colors[i + 1]
+    const b = colors[i + 2]
+    if (r > 0.86 && g > 0.58 && g < 0.92 && b < 0.46) city += 1
+  }
+  return city / total
+}
+
 function isLandAccent(colors: Float32Array, index: number): boolean {
   const offset = index * 3
   const key = `${colors[offset].toFixed(3)},${colors[offset + 1].toFixed(3)},${colors[offset + 2].toFixed(3)}`
@@ -110,6 +122,14 @@ describe('createEarthTarget', () => {
 
     expect(continentBins.length).toBeGreaterThanOrEqual(3)
     expect(oceanBins.length).toBeGreaterThanOrEqual(3)
-    expect(average(continentBins.map((bin) => bin.total))).toBeGreaterThan(average(oceanBins.map((bin) => bin.total)) * 1.18)
+    expect(average(continentBins.map((bin) => bin.total))).toBeGreaterThan(average(oceanBins.map((bin) => bin.total)) * 1.42)
+  })
+
+  it('adds restrained warm city lights around land without overwhelming the ocean', () => {
+    const target = createEarthTarget({ count: 9000, seed: 17, radius: 2.7 })
+    const ratio = cityLightRatio(target.colors)
+
+    expect(ratio).toBeGreaterThan(0.018)
+    expect(ratio).toBeLessThan(0.09)
   })
 })
